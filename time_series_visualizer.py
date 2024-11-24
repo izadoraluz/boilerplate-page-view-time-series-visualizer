@@ -25,13 +25,22 @@ def draw_line_plot():
 def draw_bar_plot():
     df_bar = df.copy()
     df_bar['year'] = df.index.year
-    df_bar['month'] = df.index.month_name()
+    df_bar['month'] = df.index.month
+
+    # Agrupar os dados
     df_grouped = df_bar.groupby(['year', 'month'])['value'].mean().unstack()
 
-    fig = df_grouped.plot(kind='bar', figsize=(12, 8)).figure
-    plt.xlabel('Years')
-    plt.ylabel('Average Page Views')
-    plt.legend(title='Months')
+    # Criar o gráfico de barras
+    fig, ax = plt.subplots(figsize=(12, 8))
+    df_grouped.plot(kind='bar', ax=ax)
+
+    # Ajustar os rótulos e a legenda
+    ax.set_xlabel('Years')
+    ax.set_ylabel('Average Page Views')
+    ax.legend(title='Months', labels=[
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ])
     plt.tight_layout()
     fig.savefig('bar_plot.png')
     return fig
@@ -40,21 +49,21 @@ def draw_bar_plot():
 def draw_box_plot():
     df_box = df.copy()
     df_box['year'] = df.index.year
-    df_box['month'] = df.index.month_name()
-    df_box['month_num'] = df.index.month
-    df_box = df_box.sort_values('month_num')
+    df_box['month'] = df.index.month
+    df_box['month_name'] = df.index.strftime('%b')  # Formatar os meses como abreviações (Jan, Feb, ...)
 
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 
+    # Box plot por ano
     sns.boxplot(x='year', y='value', data=df_box, ax=axes[0])
     axes[0].set_title('Year-wise Box Plot (Trend)')
     axes[0].set_xlabel('Year')
     axes[0].set_ylabel('Page Views')
 
-    sns.boxplot(x='month', y='value', data=df_box, ax=axes[1], order=[
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ])
+    # Box plot por mês
+    sns.boxplot(x='month_name', y='value', data=df_box, ax=axes[1],
+                order=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
     axes[1].set_title('Month-wise Box Plot (Seasonality)')
     axes[1].set_xlabel('Month')
     axes[1].set_ylabel('Page Views')
@@ -62,3 +71,4 @@ def draw_box_plot():
     plt.tight_layout()
     fig.savefig('box_plot.png')
     return fig
+
